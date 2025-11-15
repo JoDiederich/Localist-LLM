@@ -1,10 +1,12 @@
 """
-Minimal demo script for the Localist-LLM concept implementation.
+Localist-LLM – Minimal locality demo
 
 This script:
 - builds a tiny Localist encoder
-- sets different locality dial values
-- prints attention matrices so you can see how locality changes the pattern
+- sets different locality dial values (0.0, 0.5, 1.0)
+- prints attention matrices (with indices)
+- prints a simple 'locality fraction' showing how much attention mass
+  lies on neighbouring positions (|i-j| <= 1)
 """
 
 import os
@@ -22,10 +24,36 @@ if REPO_ROOT not in sys.path:
 from model.tiny_transformer import TinyLocalistEncoder
 
 
-def run_demo(seq_len: int = 10, vocab_size: int = 50):
+def compute_locality_fraction(attn_np, radius: int = 1) -> float:
+    """
+    Compute the fraction of attention mass that lies within a given
+    distance 'radius' from the diagonal, i.e. |i - j| <= radius.
+
+    attn_np: (L, L) numpy array
+    radius: neighbourhood size (1 = immediate neighbours)
+    """
+    L = attn_np.shape[0]
+    local_mass = 0.0
+    total_mass = 0.0
+
+    for i in range(L):
+        for j in range(L):
+            v = attn_np[i, j]
+            total_mass += v
+            if abs(i - j) <= radius:
+                local_mass += v
+
+    if total_mass == 0.0:
+        return 0.0
+
+    return float(local_mass / total_mass)
+
+
+def run_demo(seq_len: int = 8, vocab_size: int = 50):
     """
     Build a tiny encoder, run a random sequence through it with different
-    locality dial settings, and print the resulting attention matrices.
+    locality dial settings, and print the resulting attention matrices and
+    locality fractions.
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\nUsing device: {device}")
@@ -43,7 +71,7 @@ def run_demo(seq_len: int = 10, vocab_size: int = 50):
     # Random input token IDs
     input_ids = torch.randint(0, vocab_size, (1, seq_len), device=device)
 
-    # Access the only encoder layer
+    # Access the only encoder layer and its attention module
     layer = model.layers[0]
     attn_module = layer.self_attn
 
@@ -53,9 +81,9 @@ def run_demo(seq_len: int = 10, vocab_size: int = 50):
     for dv in dial_values:
         attn_module.locality_dial.set(dv)
 
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"Locality dial = {dv}")
-        print("=" * 50)
+        print("=" * 60)
 
         with torch.no_grad():
             _, attn_weights_all = model(input_ids)
@@ -63,14 +91,27 @@ def run_demo(seq_len: int = 10, vocab_size: int = 50):
         # Only one layer in this tiny model
         attn_weights = attn_weights_all[0]  # (batch, heads, L, L)
 
-        # Print only batch 0, head 0
+        # Take batch 0, head 0
         attn_matrix = attn_weights[0, 0]  # (L, L)
-
         attn_np = attn_matrix.cpu().numpy()
+        L = attn_np.shape[0]
 
-        # Pretty-print each row
-        for row in attn_np:
-            print(" ".join(f"{v:0.2f}" for v in row))
+        # ---- Print locality fraction ----
+        loc_frac = compute_locality_fraction(attn_np, radius=1)
+        print(f"Locality fraction (|i-j| <= 1): {loc_frac:0.3f}")
+
+        # ---- Print labelled attention matrix ----
+        print("\nAttention matrix (batch 0, head 0):\n")
+
+        # Column indices header
+        header = "      " + " ".join(f"{j:>6}" for j in range(L))
+        print(header)
+        print("      " + "-" * (7 * L))
+
+        # Each row with row index
+        for i, row in enumerate(attn_np):
+            row_str = " ".join(f"{v:0.2f}" for v in row)
+            print(f"{i:>3} | {row_str}")
 
 
 if __name__ == "__main__":
