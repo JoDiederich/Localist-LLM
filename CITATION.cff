@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "Please cite this repository if you use or discuss the Localist-LLM concept."
+title: "Localist-LLM: Minimal Conceptual Reference Implementation"
+authors:
+  - family-names: "Diederich"
+    given-names: "Joachim"
+    affiliation: "Psychology Network Pty Ltd"
+keywords:
+  - "Localist LLM"
+  - "Locality dial"
+  - "Interpretability"
+  - "AI safety"
+  - "LLM representation"
+  - "LLM safety"
+institution: "Psychology Network Pty Ltd"
+license: "Proprietary"
+version: "0.1"
+date-released: "2025-11-15"
