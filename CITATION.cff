@@ -16,3 +16,36 @@ institution: "Psychology Network Pty Ltd"
 license: "Proprietary"
 version: "0.1"
 date-released: "2025-11-15"
+
+references:
+  - type: article
+    title: "Localist LLMs -- A Mathematical Framework for Dynamic Locality Control"
+    authors:
+      - family-names: "Diederich"
+        given-names: "Joachim"
+    year: 2025
+    arxiv: "2510.09338"
+
+  - type: article
+    title: "Localist LLMs with Recruitment Learning"
+    authors:
+      - family-names: "Diederich"
+        given-names: "Joachim"
+    year: 2025
+    arxiv: "2510.17358"
+
+  - type: article
+    title: "AILA - First Experiments with Localist Language Models"
+    authors:
+      - family-names: "Diederich"
+        given-names: "Joachim"
+    year: 2025
+    arxiv: "2511.03559"
+
+  - type: article
+    title: "Rule Encoding and Compliance in Large Language Models: An Information-Theoretic Analysis"
+    authors:
+      - family-names: "Diederich"
+        given-names: "Joachim"
+    year: 2025
+    arxiv: "2510.05106"
